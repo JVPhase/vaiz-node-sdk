@@ -1,6 +1,6 @@
 # Vaiz Node.js SDK
 
-> Official Node.js/TypeScript SDK for the [Vaiz](https://vaiz.com) App
+> Node.js/TypeScript SDK for the [Vaiz](https://vaiz.com) App
 
 [![npm version](https://badge.fury.io/js/vaiz-sdk.svg)](https://badge.fury.io/js/vaiz-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -350,14 +350,6 @@ const client = new VaizClient({
 });
 ```
 
-## Examples
-
-Check out the [examples](./examples) directory for more complete examples:
-
-- [Create Task](./examples/create_task.ts)
-- [Create Document](./examples/create_document.ts)
-- [Custom Fields](./examples/custom_fields.ts)
-
 ## API Reference
 
 For detailed API documentation, visit [https://docs-python-sdk.vaiz.com](https://docs-python-sdk.vaiz.com)
@@ -393,19 +385,3 @@ npm run format
 ## License
 
 MIT License - see [LICENSE](./LICENSE) file for details.
-
-## Links
-
-- [npm Package](https://www.npmjs.com/package/vaiz-sdk)
-- [GitHub Repository](https://github.com/vaizcom/vaiz-node-sdk)
-- [Documentation](https://docs-python-sdk.vaiz.com)
-- [Vaiz Website](https://vaiz.com)
-
-## Support
-
-For issues, questions, or contributions, please visit our [GitHub repository](https://github.com/vaizcom/vaiz-node-sdk).
-
----
-
-Made with ❤️ by the Vaiz team
-

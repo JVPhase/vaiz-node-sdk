@@ -354,27 +354,3 @@ Contributions are welcome! Please:
 2. Create a feature branch
 3. Make your changes with tests
 4. Submit a pull request
-
-## Links
-
-- [npm Package](https://www.npmjs.com/package/vaiz-mcp-server)
-- [GitHub Repository](https://github.com/vaizcom/vaiz-node-sdk)
-- [Vaiz SDK](https://www.npmjs.com/package/vaiz-sdk)
-- [Model Context Protocol](https://modelcontextprotocol.io/)
-- [Vaiz Website](https://vaiz.com)
-
-## License
-
-MIT License - see [LICENSE](../LICENSE) file for details.
-
-## Support
-
-- 📧 Email: mail@vaiz.com
-- 🐛 Issues: [GitHub Issues](https://github.com/vaizcom/vaiz-node-sdk/issues)
-- 📖 Documentation: [Vaiz Docs](https://docs-python-sdk.vaiz.com)
-
----
-
-Made with ❤️ by the Vaiz team
-
-
