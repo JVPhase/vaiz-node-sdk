@@ -5,7 +5,10 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
   Tool,
+  Resource,
 } from '@modelcontextprotocol/sdk/types.js';
 import { VaizClient, Kind } from 'vaiz-sdk';
 import dotenv from 'dotenv';
@@ -32,9 +35,9 @@ const vaizClient = new VaizClient({
 // Define available tools
 const tools: Tool[] = [
   {
-    name: 'vaiz_get_tasks',
+    name: 'get_tasks',
     description:
-      'Get a list of tasks from Vaiz with optional filtering. Returns tasks with their details including name, status, priority, assignees, and more. Supports filtering by IDs, board, project, assignees, completion status, and more. Results are cached for 5 minutes - use vaiz_clear_tasks_cache to force refresh.',
+      'Get a list of tasks from Vaiz with optional filtering. Returns tasks with their details including name, status, priority, assignees, and more. Supports filtering by IDs, board, project, assignees, completion status, and more. Results are cached for 5 minutes - use clear_tasks_cache to force refresh.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -86,7 +89,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_clear_tasks_cache',
+    name: 'clear_tasks_cache',
     description:
       'Clear the tasks cache. Use this when you need to force refresh task data after making changes (creating, editing, or deleting tasks). The cache is automatically cleared after 5 minutes, but this method allows immediate cache invalidation.',
     inputSchema: {
@@ -95,7 +98,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_task',
+    name: 'get_task',
     description:
       "Get detailed information about a specific task by its slug (e.g., 'TASK-123'). Returns complete task details including description, custom fields, comments count, and attachments.",
     inputSchema: {
@@ -110,7 +113,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_create_task',
+    name: 'create_task',
     description:
       'Create a new task in Vaiz. Returns the created task with its assigned slug and ID.',
     inputSchema: {
@@ -206,9 +209,9 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_history',
+    name: 'get_history',
     description:
-      'Get history of changes for a task or other entity. Returns a list of all changes made to the entity. Each history entry contains creatorId field - use vaiz_get_space_members to get member details and display the author name (member.fullName) for each change. Always include the author information when presenting history to the user.',
+      'Get history of changes for a task or other entity. Returns a list of all changes made to the entity. Each history entry contains creatorId field - use get_space_members to get member details and display the author name (member.fullName) for each change. Always include the author information when presenting history to the user.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -233,7 +236,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_set_task_blocker',
+    name: 'set_task_blocker',
     description:
       "Set a blocking relationship between two tasks. This will add the blocker to the blocked task's blockers list and add the blocked task to the blocker's blocking list. Both tasks will be updated atomically.",
     inputSchema: {
@@ -254,7 +257,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_edit_task',
+    name: 'edit_task',
     description:
       'Edit an existing task. Can update name, description, priority, assignees, completion status, and other fields. Only provide fields you want to update.',
     inputSchema: {
@@ -346,7 +349,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_projects',
+    name: 'get_projects',
     description:
       'Get all projects in the workspace. Returns a list of projects with their IDs, names, and metadata.',
     inputSchema: {
@@ -355,7 +358,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_project',
+    name: 'get_project',
     description: 'Get detailed information about a specific project by its ID.',
     inputSchema: {
       type: 'object',
@@ -369,7 +372,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_documents',
+    name: 'get_documents',
     description:
       'Get a list of documents filtered by scope (Space/Member/Project) and scope ID. Returns documents with their metadata.',
     inputSchema: {
@@ -389,7 +392,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_document',
+    name: 'get_document',
     description: 'Get a specific document by its ID. Returns the document with its full content.',
     inputSchema: {
       type: 'object',
@@ -403,7 +406,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_create_document',
+    name: 'create_document',
     description: 'Create a new document in Vaiz. Returns the created document with its ID.',
     inputSchema: {
       type: 'object',
@@ -434,7 +437,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_append_to_document',
+    name: 'append_to_document',
     description:
       'Append content to an existing document. The content will be added at the end of the document. IMPORTANT: For task descriptions (document attached to tasks), use vaiz_append_json_document instead, as this method does not work for task descriptions. Plain text/Markdown only - HTML is NOT supported.',
     inputSchema: {
@@ -453,7 +456,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_replace_document',
+    name: 'replace_document',
     description:
       'Replace the entire content of an existing document. Plain text/Markdown only - HTML is NOT supported. For task descriptions, prefer vaiz_replace_json_document for better formatting and rich content support.',
     inputSchema: {
@@ -472,7 +475,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_replace_json_document',
+    name: 'replace_json_document',
     description:
       'Replace document content with JSON structure. Use this for creating interactive checklists, tables, and other rich content. RECOMMENDED for task descriptions and any document requiring rich formatting. Requires proper document node structure.',
     inputSchema: {
@@ -495,7 +498,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_append_json_document',
+    name: 'append_json_document',
     description:
       'Append content to document using JSON structure. RECOMMENDED for task descriptions - use this instead of vaiz_append_to_document when working with task descriptions, as plain text append does not work for task documents. Supports rich formatting including links, bold text, lists, etc.',
     inputSchema: {
@@ -518,7 +521,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_document_content',
+    name: 'get_document_content',
     description:
       'Get the JSON content structure of a document. Works for task descriptions, standalone documents, and any document by ID. Returns the parsed JSON structure of the document content.',
     inputSchema: {
@@ -533,7 +536,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_post_comment',
+    name: 'post_comment',
     description:
       'Post a comment to a document in Vaiz. Supports HTML content, file attachments, and replies.',
     inputSchema: {
@@ -562,7 +565,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_comments',
+    name: 'get_comments',
     description: 'Get all comments for a document.',
     inputSchema: {
       type: 'object',
@@ -576,7 +579,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_edit_comment',
+    name: 'edit_comment',
     description: 'Edit a comment. Can update content and manage file attachments.',
     inputSchema: {
       type: 'object',
@@ -610,7 +613,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_delete_comment',
+    name: 'delete_comment',
     description: 'Soft delete a comment.',
     inputSchema: {
       type: 'object',
@@ -624,7 +627,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_add_reaction',
+    name: 'add_reaction',
     description: 'Add a popular emoji reaction to a comment (THUMBS_UP, HEART, etc.).',
     inputSchema: {
       type: 'object',
@@ -642,7 +645,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_profile',
+    name: 'get_profile',
     description: "Get the current user's profile information.",
     inputSchema: {
       type: 'object',
@@ -650,7 +653,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_space',
+    name: 'get_space',
     description: 'Get information about a specific space.',
     inputSchema: {
       type: 'object',
@@ -663,7 +666,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_space_members',
+    name: 'get_space_members',
     description: 'Get all members in the current space.',
     inputSchema: {
       type: 'object',
@@ -671,7 +674,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_boards',
+    name: 'get_boards',
     description: 'Get all boards in the workspace.',
     inputSchema: {
       type: 'object',
@@ -679,7 +682,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_create_board_group',
+    name: 'create_board_group',
     description:
       'Create a new board group (column) on a board. Returns the created group information.',
     inputSchema: {
@@ -703,7 +706,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_edit_board_group',
+    name: 'edit_board_group',
     description:
       'Edit an existing board group (column). Can update name and associated task types.',
     inputSchema: {
@@ -731,7 +734,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_create_board_type',
+    name: 'create_board_type',
     description:
       'Create a new board type (task type) on a board. Types define categories like Bug, Feature, etc.',
     inputSchema: {
@@ -758,7 +761,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_edit_board_type',
+    name: 'edit_board_type',
     description: 'Edit an existing board type (task type). Can update name, icon, and color.',
     inputSchema: {
       type: 'object',
@@ -788,7 +791,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_get_milestones',
+    name: 'get_milestones',
     description: 'Get milestones for a specific project.',
     inputSchema: {
       type: 'object',
@@ -802,7 +805,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_create_milestone',
+    name: 'create_milestone',
     description: 'Create a new milestone in a project.',
     inputSchema: {
       type: 'object',
@@ -845,7 +848,7 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'vaiz_download_image',
+    name: 'download_image',
     description:
       'Download an image from URL and return it for analysis. The image is automatically downloaded, converted to base64, returned for analysis, and the temporary file is automatically deleted. This allows you to analyze images from Vaiz (e.g., task attachments, comment attachments) or any external URL.',
     inputSchema: {
@@ -866,6 +869,70 @@ const tools: Tool[] = [
   },
 ];
 
+// Define available resources (documentation guides)
+const resources: Resource[] = [
+  {
+    uri: 'vaiz://guides/quick-start',
+    name: 'Quick Start Guide',
+    description: 'Get started with Vaiz SDK quickly',
+    mimeType: 'text/markdown',
+  },
+  {
+    uri: 'vaiz://guides/environment-setup',
+    name: 'Environment Setup',
+    description: 'Configure your development environment for Vaiz SDK',
+    mimeType: 'text/markdown',
+  },
+  {
+    uri: 'vaiz://guides/common-patterns',
+    name: 'Common Patterns',
+    description: 'Pagination, caching, and ID management patterns',
+    mimeType: 'text/markdown',
+  },
+  {
+    uri: 'vaiz://guides/working-with-documents',
+    name: 'Working with Documents',
+    description: 'Document hierarchies and content management',
+    mimeType: 'text/markdown',
+  },
+  {
+    uri: 'vaiz://guides/real-world-scenarios',
+    name: 'Real-World Scenarios',
+    description: 'Complete examples for common use cases',
+    mimeType: 'text/markdown',
+  },
+  {
+    uri: 'vaiz://guides/performance-tips',
+    name: 'Performance Tips',
+    description: 'Optimize your SDK usage for better performance',
+    mimeType: 'text/markdown',
+  },
+  {
+    uri: 'vaiz://guides/integration-patterns',
+    name: 'Integration Patterns',
+    description: 'Webhooks and external system synchronization',
+    mimeType: 'text/markdown',
+  },
+  {
+    uri: 'vaiz://guides/error-handling',
+    name: 'Error Handling',
+    description: 'Robust error handling strategies for production',
+    mimeType: 'text/markdown',
+  },
+  {
+    uri: 'vaiz://guides/vaiz-mcp-usage',
+    name: 'Vaiz MCP Usage Guide',
+    description: 'How to use the Vaiz MCP server effectively',
+    mimeType: 'text/markdown',
+  },
+  {
+    uri: 'vaiz://guides/markdown-formatting',
+    name: 'Markdown Formatting Guide',
+    description: 'Formatting documents with Markdown in Vaiz',
+    mimeType: 'text/markdown',
+  },
+];
+
 // Create MCP server
 const server = new Server(
   {
@@ -875,6 +942,7 @@ const server = new Server(
   {
     capabilities: {
       tools: {},
+      resources: {},
     },
   }
 );
@@ -884,13 +952,456 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return { tools };
 });
 
+// Handle list resources request
+server.setRequestHandler(ListResourcesRequestSchema, async () => {
+  return { resources };
+});
+
+// Handle read resource request
+server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  const uri = request.params.uri;
+
+  // Map of resource content
+  const resourceContent: Record<string, string> = {
+    'vaiz://guides/quick-start': `# Quick Start Guide
+
+## Installation
+
+\`\`\`bash
+npm install vaiz-sdk
+\`\`\`
+
+## Basic Usage
+
+\`\`\`typescript
+import { VaizClient } from 'vaiz-sdk';
+
+const client = new VaizClient({
+  apiKey: 'your-api-key',
+  spaceId: 'your-space-id',
+});
+
+// Get tasks
+const tasks = await client.getTasks({ limit: 10 });
+
+// Create a task
+const task = await client.createTask({
+  name: 'My first task',
+  board: 'board-id',
+});
+\`\`\`
+
+For more examples, see [Vaiz SDK Documentation](https://docs-python-sdk.vaiz.com/)`,
+
+    'vaiz://guides/environment-setup': `# Environment Setup
+
+## Prerequisites
+- Node.js >= 16.0.0
+- Vaiz API key and Space ID
+
+## Configuration
+
+Create a \`.env\` file:
+\`\`\`env
+VAIZ_API_KEY=your_api_key_here
+VAIZ_SPACE_ID=your_space_id_here
+\`\`\`
+
+## Using Environment Variables
+
+\`\`\`typescript
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+const client = new VaizClient({
+  apiKey: process.env.VAIZ_API_KEY!,
+  spaceId: process.env.VAIZ_SPACE_ID!,
+});
+\`\`\`
+
+Learn more: https://docs-python-sdk.vaiz.com/patterns/environment-setup`,
+
+    'vaiz://guides/common-patterns': `# Common Patterns
+
+## Pagination
+
+\`\`\`typescript
+// Get tasks with pagination
+const tasks = await client.getTasks({
+  limit: 50,
+  skip: 0,
+});
+
+// Next page
+const nextTasks = await client.getTasks({
+  limit: 50,
+  skip: 50,
+});
+\`\`\`
+
+## ID Management
+
+**Important**: When assigning tasks, use \`Member.id\` (NOT \`_id\`):
+
+\`\`\`typescript
+const members = await client.getSpaceMembers();
+const memberId = members.members[0].id; // Use .id
+
+await client.createTask({
+  name: 'Task',
+  board: 'board-id',
+  assignees: [memberId], // Correct!
+});
+\`\`\`
+
+## Caching
+
+\`\`\`typescript
+// Clear cache when needed
+client.clearTasksCache();
+\`\`\`
+
+Learn more: https://docs-python-sdk.vaiz.com/patterns/common-patterns`,
+
+    'vaiz://guides/working-with-documents': `# Working with Documents
+
+## Document Structure
+
+\`\`\`typescript
+import { heading, paragraph, bulletList } from 'vaiz-sdk';
+
+const content = [
+  heading(1, 'Title'),
+  paragraph('Some text'),
+  bulletList('Item 1', 'Item 2'),
+];
+
+await client.replaceJsonDocument({
+  documentId: 'doc-id',
+  content,
+});
+\`\`\`
+
+## Task Descriptions
+
+For task descriptions, use JSON methods:
+
+\`\`\`typescript
+// Get task description content
+const task = await client.getTask('TASK-123');
+const content = await client.getJsonDocument(task.task.document);
+
+// Update task description
+await client.appendJsonDocument({
+  documentId: task.task.document,
+  content: [paragraph('New content')],
+});
+\`\`\`
+
+Learn more: https://docs-python-sdk.vaiz.com/patterns/working-with-documents`,
+
+    'vaiz://guides/real-world-scenarios': `# Real-World Scenarios
+
+## Scenario 1: Daily Standup Report
+
+\`\`\`typescript
+// Get yesterday's completed tasks
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+
+const tasks = await client.getTasks({
+  completed: true,
+  assignees: [memberId],
+});
+
+// Filter by completion date and generate report
+\`\`\`
+
+## Scenario 2: Sprint Planning
+
+\`\`\`typescript
+// Create milestone for sprint
+const milestone = await client.createMilestone({
+  name: 'Sprint 23',
+  project: 'project-id',
+  board: 'board-id',
+  dueStart: '2025-01-01T00:00:00Z',
+  dueEnd: '2025-01-14T23:59:59Z',
+});
+
+// Create sprint tasks
+for (const story of stories) {
+  await client.createTask({
+    name: story.name,
+    board: 'board-id',
+    milestones: [milestone.milestone.id],
+  });
+}
+\`\`\`
+
+Learn more: https://docs-python-sdk.vaiz.com/patterns/real-world-scenarios`,
+
+    'vaiz://guides/performance-tips': `# Performance Tips
+
+## 1. Use Caching Wisely
+
+\`\`\`typescript
+// Cache is valid for 5 minutes
+const tasks = await client.getTasks(); // Cached
+const tasks2 = await client.getTasks(); // From cache
+
+// Force refresh
+client.clearTasksCache();
+const freshTasks = await client.getTasks();
+\`\`\`
+
+## 2. Batch Operations
+
+\`\`\`typescript
+// Good: Batch multiple operations
+const [tasks, members, projects] = await Promise.all([
+  client.getTasks(),
+  client.getSpaceMembers(),
+  client.getProjects(),
+]);
+
+// Avoid: Sequential calls
+const tasks = await client.getTasks();
+const members = await client.getSpaceMembers();
+const projects = await client.getProjects();
+\`\`\`
+
+## 3. Pagination
+
+\`\`\`typescript
+// Good: Use pagination
+const tasks = await client.getTasks({ limit: 50 });
+
+// Avoid: Loading everything at once
+\`\`\`
+
+Learn more: https://docs-python-sdk.vaiz.com/patterns/performance-tips`,
+
+    'vaiz://guides/integration-patterns': `# Integration Patterns
+
+## Webhooks
+
+Vaiz can send webhooks for events. Handle them in your application:
+
+\`\`\`typescript
+app.post('/webhook/vaiz', async (req, res) => {
+  const event = req.body;
+  
+  switch (event.type) {
+    case 'task.created':
+      await handleTaskCreated(event.data);
+      break;
+    case 'task.updated':
+      await handleTaskUpdated(event.data);
+      break;
+  }
+  
+  res.status(200).send('OK');
+});
+\`\`\`
+
+## External System Sync
+
+\`\`\`typescript
+// Sync from external system to Vaiz
+async function syncIssues(externalIssues) {
+  for (const issue of externalIssues) {
+    await client.createTask({
+      name: issue.title,
+      board: 'board-id',
+      description: issue.description,
+    });
+  }
+}
+\`\`\`
+
+Learn more: https://docs-python-sdk.vaiz.com/patterns/integration-patterns`,
+
+    'vaiz://guides/error-handling': `# Error Handling
+
+## SDK Error Types
+
+\`\`\`typescript
+import {
+  VaizAuthError,
+  VaizValidationError,
+  VaizNotFoundError,
+} from 'vaiz-sdk';
+
+try {
+  await client.getTask('INVALID-SLUG');
+} catch (error) {
+  if (error instanceof VaizAuthError) {
+    console.error('Authentication failed');
+  } else if (error instanceof VaizValidationError) {
+    console.error('Validation error:', error.message);
+  } else if (error instanceof VaizNotFoundError) {
+    console.error('Task not found');
+  }
+}
+\`\`\`
+
+## Best Practices
+
+1. Always wrap SDK calls in try-catch
+2. Log errors for debugging
+3. Provide user-friendly error messages
+4. Retry on transient failures
+
+\`\`\`typescript
+async function retryOperation(fn, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      await delay(1000 * (i + 1));
+    }
+  }
+}
+\`\`\`
+
+Learn more: https://docs-python-sdk.vaiz.com/patterns/error-handling`,
+
+    'vaiz://guides/vaiz-mcp-usage': `# Vaiz MCP Usage Guide
+
+## Available Tools
+
+The Vaiz MCP server provides 30+ tools for interacting with Vaiz:
+
+### Tasks
+- \`get_tasks\` - Get list of tasks
+- \`get_task\` - Get task details
+- \`create_task\` - Create a new task
+- \`edit_task\` - Update a task
+- \`set_task_blocker\` - Set blocking relationships
+
+### Documents
+- \`get_document_content\` - Get document JSON structure
+- \`replace_json_document\` - Update document with rich content
+- \`append_json_document\` - Append content to document
+
+### Images
+- \`download_image\` - Download and analyze images
+
+## Usage Examples
+
+### Creating a Task
+"Create a high-priority task called 'Fix login bug' and assign it to john@example.com"
+
+### Analyzing Images
+"Download the image from TASK-123 and tell me what's in it"
+
+### Working with Documents
+"Update the task description with a checklist of 3 items"
+
+## Tips
+1. Use Member.id for assignees (not _id)
+2. Images are automatically cleaned up after analysis
+3. Use JSON document methods for rich content
+
+Learn more: https://github.com/vaizcom/vaiz-node-sdk/tree/main/mcp-server`,
+
+    'vaiz://guides/markdown-formatting': `# Markdown Formatting Guide
+
+## Document Structure Helpers
+
+\`\`\`typescript
+import {
+  heading,
+  paragraph,
+  bulletList,
+  orderedList,
+  taskList,
+  taskItem,
+  codeBlock,
+  table,
+  tableRow,
+} from 'vaiz-sdk';
+\`\`\`
+
+## Basic Formatting
+
+\`\`\`typescript
+// Headings
+heading(1, 'Main Title')
+heading(2, 'Subtitle')
+
+// Paragraphs
+paragraph('Regular text')
+
+// Lists
+bulletList('Item 1', 'Item 2', 'Item 3')
+orderedList('First', 'Second', 'Third')
+
+// Task lists (checkboxes)
+taskList(
+  taskItem('Todo item', false),
+  taskItem('Done item', true)
+)
+\`\`\`
+
+## Advanced Features
+
+\`\`\`typescript
+// Code blocks
+codeBlock('console.log("Hello");', 'javascript')
+
+// Tables
+table(
+  tableRow(
+    tableHeader('Name'),
+    tableHeader('Status')
+  ),
+  tableRow('Task 1', 'Done'),
+  tableRow('Task 2', 'In Progress')
+)
+\`\`\`
+
+## Text Formatting
+
+\`\`\`typescript
+import { text } from 'vaiz-sdk';
+
+paragraph(
+  text('Bold', true),
+  text('Italic', false, true),
+  text('Link', false, false, false, 'https://vaiz.com')
+)
+\`\`\`
+
+Learn more: https://docs-python-sdk.vaiz.com/guides/working-with-documents`,
+  };
+
+  const content = resourceContent[uri];
+
+  if (!content) {
+    throw new Error(`Resource not found: ${uri}`);
+  }
+
+  return {
+    contents: [
+      {
+        uri,
+        mimeType: 'text/markdown',
+        text: content,
+      },
+    ],
+  };
+});
+
 // Handle tool calls
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   try {
     switch (name) {
-      case 'vaiz_get_tasks': {
+      case 'get_tasks': {
         const result = await vaizClient.getTasks(args || {});
         return {
           content: [
@@ -902,7 +1413,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_clear_tasks_cache': {
+      case 'clear_tasks_cache': {
         vaizClient.clearTasksCache();
         return {
           content: [
@@ -918,7 +1429,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_task': {
+      case 'get_task': {
         if (!args?.slug) {
           throw new Error('slug is required');
         }
@@ -933,7 +1444,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_history': {
+      case 'get_history': {
         if (!args?.kind || !args?.kindId) {
           throw new Error('kind and kindId are required');
         }
@@ -953,7 +1464,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_create_task': {
+      case 'create_task': {
         if (!args?.name || !args?.board) {
           throw new Error('name and board are required');
         }
@@ -1005,7 +1516,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_set_task_blocker': {
+      case 'set_task_blocker': {
         if (!args?.blockedTaskId || !args?.blockerTaskId) {
           throw new Error('blockedTaskId and blockerTaskId are required');
         }
@@ -1025,7 +1536,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_edit_task': {
+      case 'edit_task': {
         if (!args?.taskId) {
           throw new Error('taskId is required');
         }
@@ -1076,7 +1587,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_projects': {
+      case 'get_projects': {
         const result = await vaizClient.getProjects();
         return {
           content: [
@@ -1088,7 +1599,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_project': {
+      case 'get_project': {
         if (!args?.projectId) {
           throw new Error('projectId is required');
         }
@@ -1103,7 +1614,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_documents': {
+      case 'get_documents': {
         if (!args?.kind || !args?.kindId) {
           throw new Error('kind and kindId are required');
         }
@@ -1121,7 +1632,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_document': {
+      case 'get_document': {
         if (!args?.documentId) {
           throw new Error('documentId is required');
         }
@@ -1136,7 +1647,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_create_document': {
+      case 'create_document': {
         if (!args?.kind || !args?.kindId || !args?.title || args?.index === undefined) {
           throw new Error('kind, kindId, title, and index are required');
         }
@@ -1157,7 +1668,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_append_to_document': {
+      case 'append_to_document': {
         if (!args?.documentId || !args?.content) {
           throw new Error('documentId and content are required');
         }
@@ -1175,7 +1686,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_replace_document': {
+      case 'replace_document': {
         if (!args?.documentId || !args?.content) {
           throw new Error('documentId and content are required');
         }
@@ -1193,7 +1704,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_replace_json_document': {
+      case 'replace_json_document': {
         if (!args?.documentId || !args?.content) {
           throw new Error('documentId and content are required');
         }
@@ -1211,7 +1722,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_append_json_document': {
+      case 'append_json_document': {
         if (!args?.documentId || !args?.content) {
           throw new Error('documentId and content are required');
         }
@@ -1229,7 +1740,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_document_content': {
+      case 'get_document_content': {
         if (!args?.documentId) {
           throw new Error('documentId is required');
         }
@@ -1244,7 +1755,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_post_comment': {
+      case 'post_comment': {
         if (!args?.documentId || !args?.content) {
           throw new Error('documentId and content are required');
         }
@@ -1272,7 +1783,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_comments': {
+      case 'get_comments': {
         if (!args?.documentId) {
           throw new Error('documentId is required');
         }
@@ -1289,7 +1800,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_edit_comment': {
+      case 'edit_comment': {
         if (!args?.commentId || !args?.content) {
           throw new Error('commentId and content are required');
         }
@@ -1310,7 +1821,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_delete_comment': {
+      case 'delete_comment': {
         if (!args?.commentId) {
           throw new Error('commentId is required');
         }
@@ -1327,7 +1838,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_add_reaction': {
+      case 'add_reaction': {
         if (!args?.commentId || !args?.reaction) {
           throw new Error('commentId and reaction are required');
         }
@@ -1345,7 +1856,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_profile': {
+      case 'get_profile': {
         const result = await vaizClient.getProfile();
         return {
           content: [
@@ -1357,7 +1868,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_space': {
+      case 'get_space': {
         const spaceId = (args?.spaceId as string) || VAIZ_SPACE_ID;
         const result = await vaizClient.getSpace(spaceId);
         return {
@@ -1370,7 +1881,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_space_members': {
+      case 'get_space_members': {
         const result = await vaizClient.getSpaceMembers();
         return {
           content: [
@@ -1382,7 +1893,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_boards': {
+      case 'get_boards': {
         const result = await vaizClient.getBoards();
         return {
           content: [
@@ -1394,7 +1905,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_create_board_group': {
+      case 'create_board_group': {
         if (!args?.name || !args?.boardId) {
           throw new Error('name and boardId are required');
         }
@@ -1413,7 +1924,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_edit_board_group': {
+      case 'edit_board_group': {
         if (!args?.groupId || !args?.boardId) {
           throw new Error('groupId and boardId are required');
         }
@@ -1433,7 +1944,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_create_board_type': {
+      case 'create_board_type': {
         if (!args?.name || !args?.boardId) {
           throw new Error('name and boardId are required');
         }
@@ -1453,7 +1964,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_edit_board_type': {
+      case 'edit_board_type': {
         if (!args?.typeId || !args?.boardId) {
           throw new Error('typeId and boardId are required');
         }
@@ -1474,7 +1985,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_get_milestones': {
+      case 'get_milestones': {
         if (!args?.projectId) {
           throw new Error('projectId is required');
         }
@@ -1489,7 +2000,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_create_milestone': {
+      case 'create_milestone': {
         if (!args?.name || !args?.project || !args?.board) {
           throw new Error('name, project, and board are required');
         }
@@ -1513,7 +2024,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
-      case 'vaiz_download_image': {
+      case 'download_image': {
         if (!args?.imageUrl) {
           throw new Error('imageUrl is required');
         }
