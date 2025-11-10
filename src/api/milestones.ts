@@ -20,7 +20,9 @@ export class MilestonesAPIClient extends BaseAPIClient {
    * Get all milestones for a project
    */
   async getMilestones(projectId: string): Promise<MilestonesResponse> {
-    const response = await this.makeRequest<MilestonesResponse>('getMilestones', 'POST', { projectId });
+    const response = await this.makeRequest<MilestonesResponse>('getMilestones', 'POST', {
+      projectId,
+    });
     return response;
   }
 
@@ -28,7 +30,9 @@ export class MilestonesAPIClient extends BaseAPIClient {
    * Get a specific milestone by ID
    */
   async getMilestone(milestoneId: string): Promise<GetMilestoneResponse> {
-    const response = await this.makeRequest<GetMilestoneResponse>('getMilestone', 'POST', { _id: milestoneId });
+    const response = await this.makeRequest<GetMilestoneResponse>('getMilestone', 'POST', {
+      _id: milestoneId,
+    });
     return response;
   }
 
@@ -36,7 +40,11 @@ export class MilestonesAPIClient extends BaseAPIClient {
    * Create a new milestone
    */
   async createMilestone(request: CreateMilestoneRequest): Promise<CreateMilestoneResponse> {
-    const response = await this.makeRequest<CreateMilestoneResponse>('createMilestone', 'POST', request);
+    const response = await this.makeRequest<CreateMilestoneResponse>(
+      'createMilestone',
+      'POST',
+      request
+    );
     return response;
   }
 
@@ -45,7 +53,10 @@ export class MilestonesAPIClient extends BaseAPIClient {
    */
   async editMilestone(request: EditMilestoneRequest): Promise<EditMilestoneResponse> {
     const { milestoneId, ...rest } = request;
-    const response = await this.makeRequest<EditMilestoneResponse>('editMilestone', 'POST', { _id: milestoneId, ...rest });
+    const response = await this.makeRequest<EditMilestoneResponse>('editMilestone', 'POST', {
+      _id: milestoneId,
+      ...rest,
+    });
     return response;
   }
 
@@ -53,14 +64,20 @@ export class MilestonesAPIClient extends BaseAPIClient {
    * Toggle milestone completion status
    */
   async toggleMilestone(request: ToggleMilestoneRequest): Promise<ToggleMilestoneResponse> {
-    const response = await this.makeRequest<ToggleMilestoneResponse>('toggleMilestone', 'POST', request);
+    const response = await this.makeRequest<ToggleMilestoneResponse>(
+      'toggleMilestone',
+      'POST',
+      request
+    );
     return response;
   }
 
   /**
    * Get history for a specific milestone
    */
-  async getMilestoneHistory(request: GetMilestoneHistoryRequest): Promise<GetMilestoneHistoryResponse> {
+  async getMilestoneHistory(
+    request: GetMilestoneHistoryRequest
+  ): Promise<GetMilestoneHistoryResponse> {
     const response = await this.makeRequest<GetMilestoneHistoryResponse>('getHistory', 'POST', {
       kind: 'Milestone',
       kindId: request.milestoneId,
@@ -70,4 +87,3 @@ export class MilestonesAPIClient extends BaseAPIClient {
     return response;
   }
 }
-

@@ -48,4 +48,3 @@ export interface GetMemberHistoryResponse {
   }>;
   total: number;
 }
-

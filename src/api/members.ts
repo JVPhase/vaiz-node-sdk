@@ -1,5 +1,5 @@
 import { BaseAPIClient } from './base';
-import { 
+import {
   GetSpaceMembersResponse,
   GetMemberHistoryRequest,
   GetMemberHistoryResponse,
@@ -30,4 +30,3 @@ export class MembersAPIClient extends BaseAPIClient {
     return response;
   }
 }
-
