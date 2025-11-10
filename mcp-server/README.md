@@ -19,7 +19,7 @@ Built on the [Model Context Protocol](https://modelcontextprotocol.io/), this se
 
 ## Features
 
-- ✅ **16 powerful tools** for complete Vaiz API access
+- ✅ **29 powerful tools** for complete Vaiz API access
 - ✅ **Full TypeScript support** with type safety
 - ✅ **Simple setup** with environment variables
 - ✅ **Works with Cursor, Claude Desktop**, and other MCP clients
@@ -166,16 +166,23 @@ The server provides the following tools:
 
 ### Tasks
 - **vaiz_get_tasks** - Get a list of tasks with optional filtering
+- **vaiz_clear_tasks_cache** - Clear the tasks cache to force refresh task data
 - **vaiz_get_task** - Get detailed information about a specific task
 - **vaiz_create_task** - Create a new task
-- **vaiz_edit_task** - Update an existing task
+- **vaiz_get_history** - Get history of changes for a task or other entity
 - **vaiz_set_task_blocker** - Set a blocking relationship between two tasks
+- **vaiz_edit_task** - Update an existing task
 
 ### Projects & Boards
 - **vaiz_get_projects** - Get all projects in the workspace
 - **vaiz_get_project** - Get detailed project information
-- **vaiz_get_boards** - Get all boards with optional filtering
-- **vaiz_get_milestones** - Get milestones with optional filtering
+- **vaiz_get_boards** - Get all boards in the workspace
+- **vaiz_create_board_group** - Create a new board group (column) on a board
+- **vaiz_edit_board_group** - Edit an existing board group (column)
+- **vaiz_create_board_type** - Create a new board type (task type) on a board
+- **vaiz_edit_board_type** - Edit an existing board type (task type)
+- **vaiz_get_milestones** - Get milestones for a specific project
+- **vaiz_create_milestone** - Create a new milestone in a project
 
 ### Documents
 - **vaiz_get_documents** - Get a list of documents
@@ -185,16 +192,21 @@ The server provides the following tools:
 - **vaiz_append_to_document** - Append content to an existing document
 - **vaiz_replace_document** - Replace document content with HTML/Markdown
 - **vaiz_replace_json_document** - Replace document content with structured JSON (for interactive checklists, tables, etc.)
+- **vaiz_append_json_document** - Append content to document using JSON structure
 
 > **📖 Document Content Examples**: See [MCP_DOCUMENT_EXAMPLES.md](../MCP_DOCUMENT_EXAMPLES.md) for detailed examples of document structures and how to create interactive checklists.
 
 ### Comments
 - **vaiz_post_comment** - Post a comment on a task, document, etc.
 - **vaiz_get_comments** - Get comments for a specific entity
+- **vaiz_edit_comment** - Edit a comment
+- **vaiz_delete_comment** - Soft delete a comment
+- **vaiz_add_reaction** - Add a popular emoji reaction to a comment
 
 ### User & Space
 - **vaiz_get_profile** - Get current user's profile
-- **vaiz_get_spaces** - Get all available spaces
+- **vaiz_get_space** - Get information about a specific space
+- **vaiz_get_space_members** - Get all members in the current space
 
 ## Important Notes
 
