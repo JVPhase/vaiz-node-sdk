@@ -193,7 +193,7 @@ export class TasksAPIClient extends BaseAPIClient {
    * This method will:
    * 1. Add the blocker to the blocked task's leftConnectors (tasks that block it)
    * 2. Add the blocked task to the blocker's rightConnectors (tasks it blocks)
-   * 
+   *
    * @param request - Contains blockedTaskId (the task being blocked) and blockerTaskId (the task that blocks)
    * @returns Both updated tasks
    */
@@ -234,4 +234,3 @@ export class TasksAPIClient extends BaseAPIClient {
     };
   }
 }
-

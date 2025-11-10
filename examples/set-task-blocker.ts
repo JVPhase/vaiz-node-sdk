@@ -6,7 +6,7 @@ dotenv.config();
 
 /**
  * Example: Setting a blocking relationship between tasks
- * 
+ *
  * This example demonstrates how to use the setTaskBlocker method to create
  * a dependency between two tasks, where one task blocks another.
  */
@@ -26,8 +26,8 @@ async function main() {
     console.log('Setting TASK-123 to block TASK-456...\n');
 
     const result = await client.setTaskBlocker({
-      blockedTaskId: 'TASK-456',  // The task that is being blocked
-      blockerTaskId: 'TASK-123',  // The task that blocks
+      blockedTaskId: 'TASK-456', // The task that is being blocked
+      blockerTaskId: 'TASK-123', // The task that blocks
     });
 
     console.log('✅ Blocking relationship created successfully!\n');
@@ -63,7 +63,6 @@ async function main() {
       blockerTaskId: 'TASK-456',
     });
     console.log('✅ Task TASK-789 is now blocked by both TASK-123 and TASK-456\n');
-
   } catch (error) {
     console.error('❌ Error:', error instanceof Error ? error.message : String(error));
     process.exit(1);
@@ -75,4 +74,3 @@ main().catch((error) => {
   console.error('Fatal error:', error);
   process.exit(1);
 });
-
